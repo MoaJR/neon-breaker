@@ -1,0 +1,28 @@
+{
+  "name": "neon-breaker",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Neon Breaker - roguelite arcade breakout built with vanilla JS, Canvas API and Web Audio API",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test tests/unit/*.test.mjs tests/unit/roguelite/*.test.mjs",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "capture": "node tests/e2e/capture.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "game",
+    "canvas",
+    "breakout",
+    "arcade",
+    "neon"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.65.0"
+  }
+}

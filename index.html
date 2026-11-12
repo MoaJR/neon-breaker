@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#05070f" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Neon Breaker — roguelite arcade breakout com runs, upgrades, relíquias, sinergias, chefes e progressão permanente."
+    />
+    <title>NEON BREAKER — Roguelite Arcade</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305070f'/%3E%3Crect x='10' y='16' width='44' height='7' rx='3.5' fill='%23ff2f8d'/%3E%3Crect x='10' y='27' width='44' height='7' rx='3.5' fill='%23ffe14d'/%3E%3Crect x='10' y='38' width='44' height='7' rx='3.5' fill='%2343f59b'/%3E%3Crect x='20' y='50' width='24' height='6' rx='3' fill='%2338dcff'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="stage" id="stage" aria-label="Neon Breaker game area">
+        <canvas id="game" class="stage__canvas" width="1000" height="750"></canvas>
+
+        <!-- ───────────── HUD ───────────── -->
+        <header class="hud" id="hud">
+          <div class="hud__side hud__side--left">
+            <div class="metric">
+              <span class="metric__label">Score</span>
+              <span class="metric__value" id="hud-score">0</span>
+            </div>
+            <div class="metric metric--ghost">
+              <span class="metric__label">Best</span>
+              <span class="metric__value" id="hud-best">0</span>
+            </div>
+            <div class="metric metric--coins" id="hud-coins-wrap">
+              <span class="metric__label">Coins</span>
+              <span class="metric__value" id="hud-coins">0</span>
+            </div>
+          </div>
+
+          <div class="hud__side hud__side--center">
+            <span class="hud__level" id="hud-level">LEVEL 1</span>
+            <span class="hud__sector" id="hud-sector"></span>
+            <div class="hud__effects" id="hud-effects" aria-live="polite"></div>
+            <div class="hud__combo" id="hud-combo" aria-live="polite"></div>
+            <div class="hud__shields" id="hud-shields" aria-live="polite"></div>
+          </div>
+
+          <div class="hud__side hud__side--right">
+            <button class="icon-btn icon-btn--label" id="btn-inventory" type="button" aria-label="Inventário" title="Inventário (I)">
+              <span class="icon-btn__glyph">INV</span>
+            </button>
+            <div class="lives" id="hud-lives" role="img" aria-label="Vidas: 3"></div>
+            <button class="icon-btn" id="btn-pause" type="button" aria-label="Pausar" title="Pausar (P)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="6.5" y="5" width="4" height="14" rx="1.4" />
+                <rect x="13.5" y="5" width="4" height="14" rx="1.4" />
+              </svg>
+            </button>
+            <button class="icon-btn" id="btn-sound" type="button" aria-label="Som" title="Som (M)">
+              <svg viewBox="0 0 24 24" aria-hidden="true" id="icon-sound-on">
+                <path d="M4 9.5h3.2L12 5.4v13.2L7.2 14.5H4z" />
+                <path
+                  class="wave"
+                  d="M15.2 8.6a4.6 4.6 0 0 1 0 6.8M17.6 6.2a8 8 0 0 1 0 11.6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true" id="icon-sound-off" class="is-hidden">
+                <path d="M4 9.5h3.2L12 5.4v13.2L7.2 14.5H4z" />
+                <path
+                  d="M16 9.6l4.6 4.8M20.6 9.6L16 14.4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- ───────────── BOSS BAR ───────────── -->
+        <div class="boss-bar" id="boss-bar" aria-hidden="true">
+          <div class="boss-bar__head">
+            <span class="boss-bar__name" id="boss-name">THE GUARDIAN</span>
+            <span class="boss-bar__phase" id="boss-phase">FASE 1</span>
+          </div>
+          <div class="boss-bar__track">
+            <span class="boss-bar__fill" id="boss-fill"></span>
+          </div>
+          <span class="boss-bar__sub" id="boss-sub">Sentinela do Setor</span>
+        </div>
+
+        <!-- ───────────── MENU ───────────── -->
+        <div class="screen screen--menu is-active" id="screen-menu" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <div class="screen__inner">
+            <p class="title__eyebrow">Arcade // 2026</p>
+            <h1 class="title">
+              <span class="title__line title__line--top">NEON</span>
+              <span class="title__line title__line--bottom">BREAKER</span>
+            </h1>
+            <p class="title__tagline">Quebre todas as camadas. Domine a luz.</p>
+
+            <div class="best-badge">
+              <span class="best-badge__label">Recorde</span>
+              <span class="best-badge__value" id="menu-best">0</span>
+            </div>
+
+            <button class="btn btn--primary btn--xl" id="btn-play" type="button">
+              <span class="btn__sheen" aria-hidden="true"></span>
+              <span class="btn__label">JOGAR RUN</span>
+            </button>
+
+            <div class="menu-actions">
+              <button class="btn btn--ghost btn--small is-hidden" id="btn-continue" type="button">CONTINUAR RUN</button>
+              <button class="btn btn--ghost btn--small" id="btn-classic" type="button">ARCADE CLÁSSICO</button>
+              <button class="btn btn--ghost btn--small" id="btn-meta" type="button">PROGRESSÃO</button>
+            </div>
+            <p class="menu-platform" id="menu-platform">PLATAFORMA: STANDARD</p>
+
+            <ul class="hints">
+              <li><span class="hints__key">Mouse / Touch</span> mover a plataforma</li>
+              <li><span class="hints__key">← → / A D</span> mover com o teclado</li>
+              <li><span class="hints__key">Espaço / Clique</span> lançar a bola</li>
+              <li><span class="hints__key">P / Esc</span> pausar</li>
+              <li><span class="hints__key">I / Tab</span> inventário da run</li>
+            </ul>
+
+            <div class="menu-settings">
+              <button class="toggle" id="btn-menu-sound" type="button" aria-pressed="true">
+                <span class="toggle__track"><span class="toggle__thumb"></span></span>
+                <span class="toggle__label">Áudio</span>
+              </button>
+              <button class="toggle" id="btn-menu-quality" type="button" aria-pressed="true">
+                <span class="toggle__track"><span class="toggle__thumb"></span></span>
+                <span class="toggle__label">Efeitos</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───────────── PAUSE ───────────── -->
+        <div class="screen screen--pause" id="screen-pause" role="dialog" aria-modal="true" aria-label="Jogo pausado">
+          <div class="screen__inner">
+            <p class="screen__eyebrow">Sistema em espera</p>
+            <h2 class="screen__title">PAUSADO</h2>
+            <div class="btn-stack">
+              <button class="btn btn--primary" id="btn-resume" type="button">CONTINUAR</button>
+              <button class="btn btn--ghost" id="btn-restart" type="button">REINICIAR</button>
+              <button class="btn btn--ghost" id="btn-pause-menu" type="button">MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───────────── GAME OVER ───────────── -->
+        <div class="screen screen--over" id="screen-over" role="dialog" aria-modal="true" aria-label="Fim de jogo">
+          <div class="screen__inner">
+            <p class="screen__eyebrow screen__eyebrow--danger">Sinal perdido</p>
+            <h2 class="screen__title screen__title--danger">GAME OVER</h2>
+            <div class="score-readout">
+              <div class="score-readout__item">
+                <span class="score-readout__label">Pontuação</span>
+                <span class="score-readout__value" id="over-score">0</span>
+              </div>
+              <div class="score-readout__item">
+                <span class="score-readout__label">Recorde</span>
+                <span class="score-readout__value score-readout__value--best" id="over-best">0</span>
+              </div>
+            </div>
+            <p class="record-flag is-hidden" id="over-record">NOVO RECORDE!</p>
+            <div class="btn-stack">
+              <button class="btn btn--primary" id="btn-again" type="button">JOGAR DE NOVO</button>
+              <button class="btn btn--ghost" id="btn-over-menu" type="button">MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───────────── VICTORY ───────────── -->
+        <div class="screen screen--victory" id="screen-victory" role="dialog" aria-modal="true" aria-label="Vitória">
+          <div class="screen__inner">
+            <p class="screen__eyebrow screen__eyebrow--gold">Todas as camadas rompidas</p>
+            <h2 class="screen__title screen__title--gold">VITÓRIA</h2>
+            <div class="score-readout">
+              <div class="score-readout__item">
+                <span class="score-readout__label">Pontuação</span>
+                <span class="score-readout__value" id="victory-score">0</span>
+              </div>
+              <div class="score-readout__item">
+                <span class="score-readout__label">Recorde</span>
+                <span class="score-readout__value score-readout__value--best" id="victory-best">0</span>
+              </div>
+            </div>
+            <p class="record-flag is-hidden" id="victory-record">NOVO RECORDE!</p>
+            <div class="btn-stack">
+              <button class="btn btn--primary" id="btn-victory-again" type="button">JOGAR DE NOVO</button>
+              <button class="btn btn--ghost" id="btn-victory-menu" type="button">MENU</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───────────── LEVEL TRANSITIONS ───────────── -->
+        <div class="level-intro" id="level-intro" aria-hidden="true">
+          <span class="level-intro__index" id="level-intro-index">01</span>
+          <span class="level-intro__name" id="level-intro-name">IGNITION</span>
+        </div>
+
+        <div class="level-clear" id="level-clear" aria-hidden="true">
+          <span class="level-clear__label">Fase concluída</span>
+          <span class="level-clear__score" id="level-clear-score">0 PTS</span>
+          <span class="level-clear__bonus" id="level-clear-bonus">+0</span>
+        </div>
+
+        <!-- ───────────── ROGUELITE OVERLAYS ───────────── -->
+        <div class="rl-overlay" id="rl-overlay" aria-live="polite"></div>
+
+        <!-- ───────────── TOASTS / COUNTDOWN ───────────── -->
+        <div class="toasts" id="toasts" aria-live="polite"></div>
+        <div class="countdown" id="countdown" aria-hidden="true"></div>
+      </section>
+    </main>
+
+    <noscript>
+      <p class="noscript">Este jogo precisa de JavaScript habilitado.</p>
+    </noscript>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
